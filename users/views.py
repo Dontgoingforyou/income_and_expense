@@ -1,10 +1,9 @@
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, FormView, TemplateView
+from django.views.generic import CreateView, FormView
 
 from users.forms import CustomUserCreationForm, User
 
@@ -31,7 +30,7 @@ class RegisterView(CreateView):
 class LoginView(FormView):
     form_class = AuthenticationForm
     template_name = 'users/login.html'
-    success_url = reverse_lazy('users:home')
+    success_url = reverse_lazy('main:home')
 
     def form_valid(self, form):
         user = form.get_user()
@@ -47,7 +46,5 @@ class LogoutView(View):
         return redirect('users:login')
 
 
-class HomeView(LoginRequiredMixin, TemplateView):
-    template_name = 'users/home.html'
-    login_url = reverse_lazy('users:login')
+
 
