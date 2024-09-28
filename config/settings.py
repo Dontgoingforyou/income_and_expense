@@ -16,6 +16,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -50,9 +51,14 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'income_and_expense',
+        'USER': 'postgres',
+        'PASSWORD': 'evibul29',
+        'HOST': 'localhost',
+        "PORT": '5432',
     }
+
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -87,3 +93,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+AUTH_USER_MODEL = 'users.CustomUser'
+
+LOGIN_URL = 'users:login'  # Имя маршрута для страницы входа
+LOGIN_REDIRECT_URL = 'users:home'  # Имя маршрута после успешного входа
+LOGOUT_REDIRECT_URL = 'users:login'  # Имя маршрута после выхода

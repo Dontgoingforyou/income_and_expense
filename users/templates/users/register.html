@@ -1,0 +1,74 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
+
+    <title>Система учетов доход и расходов</title>
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/floating-labels/">
+
+    <!-- Bootstrap core CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="{% static 'css/floating-labels.css' %}" rel="stylesheet">
+</head>
+
+<body>
+<form class="form-signin" method="post">
+    {% csrf_token %}
+    <div class="text-center mb-4">
+        <img class="mb-4" src="https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg" alt="" width="72"
+             height="72">
+        <h1 class="h3 mb-3 font-weight-normal">Система учетов доход и расходов</h1>
+        <p>Регистрация</p>
+    </div>
+
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        {{ form.errors }}
+    </div>
+    {% endif %}
+
+    <div class="form-label-group">
+        <input type="text" name="username" id="inputUsername" class="form-control" placeholder="Username" required
+               autofocus>
+        <label for="inputUsername">Введите Имя или Логин</label>
+    </div>
+
+    <div class="form-label-group">
+        <input type="email" name="email" id="inputEmail" class="form-control" placeholder="Email address" required
+               autofocus>
+        <label for="inputEmail">Введите адрес электронной почты</label>
+    </div>
+
+    <div class="form-label-group">
+        <input type="password" name="password1" id="inputPassword1" class="form-control" placeholder="Password"
+               required>
+        <label for="inputPassword1">Введите пароль</label>
+    </div>
+
+    <div class="form-label-group">
+        <input type="password" name="password2" id="inputPassword2" class="form-control" placeholder="Password"
+               required>
+        <label for="inputPassword2">Повторите пароль</label>
+    </div>
+
+    <div class="checkbox mb-3">
+        <label>
+            <input type="checkbox" value="remember-me"> Запомнить меня
+        </label>
+    </div>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Зарегистрироваться</button>
+    <button class="btn btn-lg btn-primary btn-block" type="button"
+            onclick="window.location.href='{% url 'users:login' %}'">У меня уже есть аккаунт
+    </button>
+    <p class="mt-5 mb-3 text-muted text-center">&copy; 2024</p>
+</form>
+</body>
+</html>
