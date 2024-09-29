@@ -4,33 +4,105 @@
 </div>
 
 <!-- График -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@2.7.1/dist/Chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    var ctx = document.getElementById("myChart");
-    var myChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-        datasets: [{
-          data: [15339, 21345, 18483, 24003, 23489, 24092, 12034],
-          lineTension: 0,
-          backgroundColor: 'transparent',
-          borderColor: '#007bff',
-          borderWidth: 4,
-          pointBackgroundColor: '#007bff'
-        }]
-      },
-      options: {
-        scales: {
-          yAxes: [{
-            ticks: {
-              beginAtZero: false
+    let myChartInstance = null;  // Глобальная переменная для Chart
+
+    // Функция для получения данных с сервера
+    async function fetchChartData() {
+        const period = document.getElementById('periodSelect').value;
+        try {
+            const response = await fetch(`{% url 'incomes:incomes_chart_data' %}?period=${period}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                credentials: 'include'  // Включает куки для аутентификации
+            });
+            if (!response.ok) {
+                throw new Error('Ошибка сети');
             }
-          }]
-        },
-        legend: {
-          display: false,
+            const data = await response.json();
+            console.log('Полученные данные для графика:', data);  // Отладка
+            return data;
+        } catch (error) {
+            console.error('Ошибка при загрузке данных графика:', error);
+            return { labels: [], data: [] };
         }
-      }
-    });
+    }
+
+    // Функция для инициализации/обновления графика
+    async function initChart() {
+        console.log('Функция initChart вызвана');  // Отладка
+        const chartData = await fetchChartData();
+        console.log('Инициализация графика с данными:', chartData);  // Отладка
+
+        if (!chartData.labels.length || !chartData.data.length) {
+            console.warn('Нет данных для отображения на графике.');
+            if (myChartInstance) {
+                myChartInstance.destroy();
+                myChartInstance = null;
+            }
+            return;
+        }
+
+        const ctx = document.getElementById("myChart").getContext("2d");
+
+        // Если график уже существует, обновляем его
+        if (myChartInstance) {
+            myChartInstance.data.labels = chartData.labels;
+            myChartInstance.data.datasets[0].data = chartData.data;
+            myChartInstance.options.plugins.title.text = `Доходы за последние ${document.getElementById('periodSelect').value} дней`;
+            myChartInstance.update();
+        } else {
+            // Создаём новый график
+            myChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: 'Доходы',
+                        data: chartData.data,
+                        tension: 0,
+                        backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                        borderColor: '#007bff',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#007bff',
+                        fill: true
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Сумма'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Дата'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: `Доходы за последние ${document.getElementById('periodSelect').value} дней`
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // Инициализируем график при загрузке страницы
+    document.addEventListener('DOMContentLoaded', initChart);
 </script>

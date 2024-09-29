@@ -16,13 +16,14 @@
             <div class="sidebar-sticky">
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link active" href="{% url 'main:home' %}">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'main:home' %}">
                             <span data-feather="home"></span>
                             Главная <span class="sr-only">(current)</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'incomes:incomes_list' %}">
+                        {% url 'incomes:incomes_list' as incomes_url %}
+                        <a class="nav-link {% if request.path == incomes_url %}active{% endif %}" href="{% url 'incomes:incomes_list' %}">
                             <span data-feather="file"></span>
                             Доходы
                         </a>
@@ -70,15 +71,3 @@
         </nav>
     </div>
 </div>
-
-<!-- JavaScript для работы с меню и иконками -->
-<script src="{% static 'js/jquery-3.2.1.slim.min.js' %}"></script>
-<script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
-<script src="{% static 'js/popper.min.js' %}"></script>
-<script src="{% static 'js/bootstrap.min.js' %}"></script>
-
-<!-- Icons -->
-<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-<script>
-    feather.replace()
-</script>

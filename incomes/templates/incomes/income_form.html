@@ -1,9 +1,8 @@
-{% extends 'main/base.html' %}  <!-- Наследуем от базового шаблона -->
+{% extends 'main/base.html' %}
 {% load static %}
 {% load tags %}
 
-{% block title %}Добавление дохода{% endblock %}  <!-- Заголовок страницы -->
-
+{% block title %}Добавление дохода{% endblock %}
 {% block content %}
 <div class="container mt-5">
     <h2 style="font-weight: normal;" class="text-center">Добавление дохода</h2>
@@ -11,9 +10,9 @@
         {% csrf_token %}
         {{ form.non_field_errors }}
 
-        <div class="mb-3">
+        <div class="mb-3" >
             {{ form.date.label_tag }}
-            {{ form.date|add_class:"form-control" }}
+            {{ form.date|add_class:"form-control datepicker" }}
         </div>
 
         <div class="mb-3">
@@ -39,4 +38,6 @@
         <button type="submit" class="btn btn-primary">Добавить доход</button>
     </form>
 </div>
+
+
 {% endblock %}
