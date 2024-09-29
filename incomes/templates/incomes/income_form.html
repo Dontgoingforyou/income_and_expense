@@ -5,12 +5,18 @@
 {% block title %}Добавление дохода{% endblock %}
 {% block content %}
 <div class="container mt-5">
-    <h2 style="font-weight: normal;" class="text-center">Добавление дохода</h2>
+    <h2 style="font-weight: normal;" class="text-center">
+        {% if object %}
+        Изменение данных о доходе
+        {% else %}
+        Добавление дохода
+        {% endif %}
+    </h2>
     <form method="POST" enctype="multipart/form-data" class="needs-validation">
         {% csrf_token %}
         {{ form.non_field_errors }}
 
-        <div class="mb-3" >
+        <div class="mb-3">
             {{ form.date.label_tag }}
             {{ form.date|add_class:"form-control datepicker" }}
         </div>
@@ -35,7 +41,13 @@
             {{ form.context|add_class:"form-control" }}
         </div>
 
-        <button type="submit" class="btn btn-primary">Добавить доход</button>
+        <button type="submit" class="btn btn-primary">
+            {% if object %}
+            Изменить
+            {% else %}
+            Добавить доход
+            {% endif %}
+        </button>
     </form>
 </div>
 

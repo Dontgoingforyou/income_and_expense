@@ -1,14 +1,12 @@
 from datetime import timedelta
-
 from django.db.models import Sum
 from django.utils import timezone
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView
+from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from rest_framework import viewsets, permissions
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from .models import Income
 from .serializers import IncomeSerializer
 
@@ -31,6 +29,13 @@ class IncomeListView(ListView):
         return Income.objects.filter(user=self.request.user)
 
 
+class IncomeDetailView(DetailView):
+    model = Income
+
+    def get_queryset(self):
+        return Income.objects.filter(user=self.request.user)
+
+
 class IncomeCreateView(CreateView):
     model = Income
     fields = ("date", "amount", "source", "category", "context")
@@ -43,6 +48,27 @@ class IncomeCreateView(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
+
+
+class IncomeUpdateView(UpdateView):
+    model = Income
+    fields = ("date", "amount", "source", "category", "context")
+    success_url = reverse_lazy('incomes:incomes_list')
+
+    def get_queryset(self):
+        return Income.objects.filter(user=self.request.user)
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+
+class IncomeDeleteView(DeleteView):
+    model = Income
+    success_url = reverse_lazy('incomes:incomes_list')
+
+    def get_queryset(self):
+        return Income.objects.filter(user=self.request.user)
 
 
 class IncomeChartDataView(APIView):
