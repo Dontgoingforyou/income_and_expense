@@ -7,7 +7,7 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
     <h2 class="h2">Последние добавленные доходы</h2>
     <div>
-        <a href="{% url 'incomes:incomes_create' %}" class="btn btn-primary">Добавить доход</a>
+        <a href="{{ operation_create_url }}" class="btn btn-primary">Добавить доход</a>
     </div>
 </div>
 
@@ -27,22 +27,21 @@
         </tr>
         </thead>
         <tbody>
-        {% for income in incomes %}
+        {% for operation_info in operations %}
         <tr>
-
-            <td>Доход</td>
-            <td>{{ income.amount }}</td>
-            <td>{{ income.date }}</td>
-            <td>{{ income.source }}</td>
-            <td>{{ income.category }}</td>
+            <td>{{ operation_info.operation.operation_type }}</td>
+            <td>{{ operation_info.operation.amount }}</td>
+            <td>{{ operation_info.operation.date }}</td>
+            <td>{{ operation_info.operation.source }}</td>
+            <td>{{ operation_info.operation.category }}</td>
             <td>
-                <a href="{% url 'incomes:incomes_detail' income.pk %}" class="btn btn-info btn-sm" title="Детали">
+                <a href="{{ operation_info.detail_url}}" class="btn btn-info btn-sm" title="Детали">
                     <i class="fas fa-eye"></i>
                 </a>
-                <a href="{% url 'incomes:incomes_update' income.pk %}" class="btn btn-warning btn-sm" title="Редактировать">
+                <a href="{{ operation_info.update_url }}" class="btn btn-warning btn-sm" title="Редактировать">
                     <i class="fas fa-edit"></i>
                 </a>
-                <form action="{% url 'incomes:incomes_delete' income.pk %}" method="post" style="display:inline;">
+                <form action="{{ operation_info.delete_url }}" method="post" style="display:inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger btn-sm" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить этот доход?');">
                         <i class="fas fa-trash"></i>
@@ -58,5 +57,4 @@
         </tbody>
     </table>
 </div>
-
 {% endblock %}

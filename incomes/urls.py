@@ -7,14 +7,14 @@ from .views import IncomeViewSet, IncomeListView, IncomeCreateView, IncomeChartD
 app_name = IncomesConfig.name
 
 router = DefaultRouter()
-router.register(r'income-list', IncomeViewSet, basename='income')
+router.register(r'api', IncomeViewSet, basename='income')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('incomes_list/', IncomeListView.as_view(), name='incomes_list'),
-    path('<int:pk>/incomes_detail/', IncomeDetailView.as_view(), name='incomes_detail'),
-    path('incomes_create/', IncomeCreateView.as_view(), name='incomes_create'),
-    path('<int:pk>/incomes_update/', IncomeUpdateView.as_view(), name='incomes_update'),
-    path('<int:pk>/incomes_delete/', IncomeDeleteView.as_view(), name='incomes_delete'),
+    path('incomes/', IncomeListView.as_view(), name='incomes_list'),
+    path('incomes/<int:pk>/', IncomeDetailView.as_view(), name='incomes_detail'),
+    path('incomes/create/', IncomeCreateView.as_view(), name='incomes_create'),
+    path('incomes/<int:pk>/update/', IncomeUpdateView.as_view(), name='incomes_update'),
+    path('incomes/<int:pk>/delete/', IncomeDeleteView.as_view(), name='incomes_delete'),
     path('incomes-chart-data/', IncomeChartDataView.as_view(), name='incomes_chart_data'),
 ]

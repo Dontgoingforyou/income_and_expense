@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, FormView
 
-from users.forms import CustomUserCreationForm, User
+from users.forms import User, CustomUserCreationForm
 
 
 class RegisterView(CreateView):

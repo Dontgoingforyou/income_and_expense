@@ -1,74 +1,63 @@
 from datetime import timedelta
 from django.db.models import Sum
 from django.utils import timezone
-from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
+from django.urls import reverse_lazy, reverse
 from rest_framework import viewsets, permissions
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from main.views import BaseDetailView, BaseCreateView, BaseUpdateView, BaseDeleteView, \
+    BaseOperationViewSet, BaseOperationListView
 from .models import Income
 from .serializers import IncomeSerializer
 
-class IncomeViewSet(viewsets.ModelViewSet):
+
+class IncomeViewSet(BaseOperationViewSet):
     serializer_class = IncomeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-        return Income.objects.filter(user=self.request.user).order_by('-date')
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-
-class IncomeListView(ListView):
+class IncomeListView(BaseOperationListView):
     model = Income
-    context_object_name = 'incomes'
+    template_name = 'main/operation_list.html'
 
-    def get_queryset(self):
-        return Income.objects.filter(user=self.request.user)
+    def get_list_url(self):
+        return reverse('incomes:incomes_list')
 
+    def get_create_url(self):
+        return reverse('incomes:incomes_create')
 
-class IncomeDetailView(DetailView):
+class IncomeDetailView(BaseDetailView):
     model = Income
-
-    def get_queryset(self):
-        return Income.objects.filter(user=self.request.user)
-
-
-class IncomeCreateView(CreateView):
-    model = Income
-    fields = ("date", "amount", "source", "category", "context")
-    success_url = reverse_lazy('incomes:incomes_list')
-
-    def form_valid(self, form):
-        form.instance.user = self.request.user
-        return super().form_valid(form)
+    template_name = 'main/operation_detail.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['update_url'] = reverse('incomes:incomes_update', kwargs={'pk':self.object.pk})
+        context['delete_url'] = reverse('incomes:incomes_delete', kwargs={'pk':self.object.pk})
+        context['operation_list_url'] = reverse('incomes:incomes_list')
         return context
 
-
-class IncomeUpdateView(UpdateView):
+class IncomeCreateView(BaseCreateView):
     model = Income
-    fields = ("date", "amount", "source", "category", "context")
+    template_name = 'main/operation_form.html'
     success_url = reverse_lazy('incomes:incomes_list')
 
-    def get_queryset(self):
-        return Income.objects.filter(user=self.request.user)
 
-    def form_valid(self, form):
-        form.instance.user = self.request.user
-        return super().form_valid(form)
-
-
-class IncomeDeleteView(DeleteView):
+class IncomeUpdateView(BaseUpdateView):
     model = Income
+    template_name = 'main/operation_form.html'
     success_url = reverse_lazy('incomes:incomes_list')
 
-    def get_queryset(self):
-        return Income.objects.filter(user=self.request.user)
+class IncomeDeleteView(BaseDeleteView):
+    model = Income
+    template_name = 'main/operation_confirm_delete.html'
+    success_url = reverse_lazy('incomes:incomes_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['detail_url'] = reverse('incomes:incomes_detail', kwargs={'pk': self.object.pk})
+        return context
 
 
 class IncomeChartDataView(APIView):
