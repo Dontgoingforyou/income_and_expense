@@ -10,34 +10,36 @@
 
 {% include 'main/chart.html' %}
 
-<h4 class="mt-4">Последние добавленные доходы и расходы</h4>
+<h4 class="mt-4">Последние операции</h4>
 <div class="table-responsive">
     <table class="table table-striped table-sm">
         <thead>
-            <tr>
-                <th>Действие</th>
-                <th>Сумма</th>
-                <th>Дата</th>
-                <th>Источник</th>
-                <th>Категория</th>
-            </tr>
+        <tr>
+            <th>Операция</th>
+            <th>Сумма</th>
+            <th>Дата</th>
+            <th>Источник</th>
+            <th>Категория</th>
+            <th>Комментарии</th>
+        </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>Lorem</td>
-                <td>ipsum</td>
-                <td>dolor</td>
-                <td>sit</td>
-                <td>sit</td>
-            </tr>
-            <tr>
-                <td>amet</td>
-                <td>consectetur</td>
-                <td>adipiscing</td>
-                <td>elit</td>
-                <td>elit</td>
-            </tr>
+        {% for operation in latest_operations %}
+        <tr>
+            <td>{{ operation.type }}</td>
+            <td>{{ operation.operation.amount }}</td>
+            <td>{{ operation.operation.date }}</td>
+            <td>{{ operation.operation.source }}</td>
+            <td>{{ operation.operation.category }}</td>
+            <td>{{ operation.operation.context }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">Нет операций для отображения.</td>
+        </tr>
+        {% endfor %}
         </tbody>
     </table>
 </div>
+
 {% endblock %}

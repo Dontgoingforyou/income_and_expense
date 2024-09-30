@@ -2,14 +2,14 @@
 {% load static %}
 {% load tags %}
 
-{% block title %}Добавление дохода{% endblock %}
+{% block title %}Добавление операции{% endblock %}
 {% block content %}
 <div class="container mt-5">
     <h2 style="font-weight: normal;" class="text-center">
         {% if object %}
         Изменение данных о доходе
         {% else %}
-        Добавление дохода
+        Добавление {{ operation_type }}a
         {% endif %}
     </h2>
     <form method="POST" enctype="multipart/form-data" class="needs-validation">
@@ -45,7 +45,7 @@
             {% if object %}
             Изменить
             {% else %}
-            Добавить доход
+            Добавить
             {% endif %}
         </button>
     </form>

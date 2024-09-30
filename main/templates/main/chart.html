@@ -1,108 +1,115 @@
-<!-- Элемент canvas для графика -->
 <div class="chart-container">
-    <canvas id="myChart" width="1500" height="380"></canvas>
+    <canvas id="combinedChart" width="1500" height="380"></canvas>
 </div>
 
-<!-- График -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    let myChartInstance = null;  // Глобальная переменная для Chart
+    let combinedChartInstance = null;
 
-    // Функция для получения данных с сервера
-    async function fetchChartData() {
-        const period = document.getElementById('periodSelect').value;
-        try {
-            const response = await fetch(`{% url 'incomes:incomes_chart_data' %}?period=${period}`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                credentials: 'include'  // Включает куки для аутентификации
-            });
-            if (!response.ok) {
-                throw new Error('Ошибка сети');
-            }
-            const data = await response.json();
-            console.log('Полученные данные для графика:', data);  // Отладка
-            return data;
-        } catch (error) {
-            console.error('Ошибка при загрузке данных графика:', error);
-            return { labels: [], data: [] };
+    async function fetchCombinedChartData() {
+    const period = document.getElementById('periodSelect').value;
+    try {
+        const incomeResponse = await fetch(`/api/operations/chart/?type=income&period=${period}`);
+        const expenseResponse = await fetch(`/api/operations/chart/?type=expense&period=${period}`);
+
+        if (!incomeResponse.ok || !expenseResponse.ok) {
+            throw new Error('Ошибка сети');
         }
+
+        const incomeData = await incomeResponse.json();
+        const expenseData = await expenseResponse.json();
+
+        console.log("Income Data:", incomeData); // Лог для проверки данных доходов
+        console.log("Expense Data:", expenseData); // Лог для проверки данных расходов
+
+        return {
+            labels: incomeData.labels,
+            incomeData: incomeData.incomeData,
+            expenseData: expenseData.expenseData
+        };
+    } catch (error) {
+        console.error('Ошибка при загрузке данных:', error);
+        return {
+            labels: [],
+            incomeData: [],
+            expenseData: []
+        };
+    }
+}
+
+    async function initCombinedChart() {
+    const chartData = await fetchCombinedChartData();
+    console.log("Chart Data:", chartData); // Лог для проверки данных для графика
+    const ctx = document.getElementById("combinedChart").getContext("2d");
+
+    if (!chartData.incomeData.length && !chartData.expenseData.length) {
+        console.warn('Нет данных для отображения на графике.');
+        return;
     }
 
-    // Функция для инициализации/обновления графика
-    async function initChart() {
-        console.log('Функция initChart вызвана');  // Отладка
-        const chartData = await fetchChartData();
-        console.log('Инициализация графика с данными:', chartData);  // Отладка
-
-        if (!chartData.labels.length || !chartData.data.length) {
-            console.warn('Нет данных для отображения на графике.');
-            if (myChartInstance) {
-                myChartInstance.destroy();
-                myChartInstance = null;
-            }
-            return;
-        }
-
-        const ctx = document.getElementById("myChart").getContext("2d");
-
-        // Если график уже существует, обновляем его
-        if (myChartInstance) {
-            myChartInstance.data.labels = chartData.labels;
-            myChartInstance.data.datasets[0].data = chartData.data;
-            myChartInstance.options.plugins.title.text = `Доходы за последние ${document.getElementById('periodSelect').value} дней`;
-            myChartInstance.update();
-        } else {
-            // Создаём новый график
-            myChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: chartData.labels,
-                    datasets: [{
+    if (combinedChartInstance) {
+        combinedChartInstance.data.labels = chartData.labels;
+        combinedChartInstance.data.datasets[0].data = chartData.incomeData;
+        combinedChartInstance.data.datasets[1].data = chartData.expenseData;
+        combinedChartInstance.update();
+    } else {
+        combinedChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [
+                    {
                         label: 'Доходы',
-                        data: chartData.data,
+                        data: chartData.incomeData,
                         tension: 0,
                         backgroundColor: 'rgba(0, 123, 255, 0.2)',
                         borderColor: '#007bff',
                         borderWidth: 2,
                         pointBackgroundColor: '#007bff',
                         fill: true
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Сумма'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Дата'
-                            }
-                        }
                     },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                        },
+                    {
+                        label: 'Расходы',
+                        data: chartData.expenseData,
+                        tension: 0,
+                        backgroundColor: 'rgba(255, 0, 0, 0.2)',
+                        borderColor: '#ff0000',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#ff0000',
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
                         title: {
                             display: true,
-                            text: `Доходы за последние ${document.getElementById('periodSelect').value} дней`
+                            text: 'Сумма'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Дата'
                         }
                     }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: `Операции за последние ${document.getElementById('periodSelect').value} дней`
+                    }
                 }
-            });
-        }
+            }
+        });
     }
+}
 
-    // Инициализируем график при загрузке страницы
-    document.addEventListener('DOMContentLoaded', initChart);
+    document.addEventListener('DOMContentLoaded', initCombinedChart);
 </script>

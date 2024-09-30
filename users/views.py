@@ -6,13 +6,14 @@ from django.views import View
 from django.views.generic import CreateView, FormView
 
 from users.forms import User, CustomUserCreationForm
+from users.services import send_registration_email
 
 
 class RegisterView(CreateView):
     model = User
     form_class = CustomUserCreationForm
     template_name = 'users/register.html'
-    success_url = reverse_lazy('users:home')
+    success_url = reverse_lazy('main:home')
 
     def form_valid(self, form):
         email = form.cleaned_data.get('email')
@@ -23,6 +24,7 @@ class RegisterView(CreateView):
         response = super().form_valid(form)
         user = self.object
         login(self.request, user)
+        send_registration_email(user)
         return response
 
 
@@ -40,8 +42,7 @@ class LoginView(FormView):
 
 class LogoutView(View):
 
-    @staticmethod
-    def get(request):
+    def get(self, request):
         logout(request)
         return redirect('users:login')
 

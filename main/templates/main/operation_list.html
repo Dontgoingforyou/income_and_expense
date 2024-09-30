@@ -5,15 +5,15 @@
 {% block content %}
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
-    <h2 class="h2">Последние добавленные доходы</h2>
+    <h2 class="h2">Последние добавленные {{ operation_type|lower }}ы</h2>
     <div>
-        <a href="{{ operation_create_url }}" class="btn btn-primary">Добавить доход</a>
+        <a href="{{ operation_create_url }}" class="btn btn-primary">Добавить {{ operation_type|lower }}</a>
     </div>
 </div>
 
 {% include 'main/chart.html' %}
 
-<h4 class="mt-4">Ваши доходы</h4>
+<h4 class="mt-4">Ваши {{ operation_type }}ы</h4>
 <div class="table-responsive">
     <table class="table table-striped table-sm">
         <thead>
@@ -29,8 +29,8 @@
         <tbody>
         {% for operation_info in operations %}
         <tr>
-            <td>{{ operation_info.operation.operation_type }}</td>
-            <td>{{ operation_info.operation.amount }}</td>
+            <td>{{ operation_type }}</td>
+            <td>{{ operation_info.operation.amount }} руб.</td>
             <td>{{ operation_info.operation.date }}</td>
             <td>{{ operation_info.operation.source }}</td>
             <td>{{ operation_info.operation.category }}</td>
@@ -51,7 +51,7 @@
         </tr>
         {% empty %}
         <tr>
-            <td colspan="5">Нет доходов для отображения.</td>
+            <td colspan="5">Нет {{ operation_type }}ов для отображения.</td>
         </tr>
         {% endfor %}
         </tbody>
