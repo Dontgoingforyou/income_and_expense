@@ -21,16 +21,16 @@
 ## Установка
 
 1. Склонируйте репозиторий:
-   git clone git@github.com:Dontgoingforyou/income_and_expense.git
+   ```git clone git@github.com:Dontgoingforyou/income_and_expense.git
 
 2. Сделайте миграции для создания БД
-   python manage.py migrate
+   ```python manage.py migrate
 
 3. Создайте суперпользователя для доступа к админке:
-   python manage.py createsuperuser
+   ```python manage.py createsuperuser
 
 4. Запустите сервер разработки:
-   python manage.py runserver
+   ```python manage.py runserver
 
 ## Использование
 1. Зарегистрируйтесь или войдите в систему.
