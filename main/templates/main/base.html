@@ -9,7 +9,6 @@
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
 </head>
 <body>
 {% include 'main/includes/inc_menu.html' %}
@@ -17,7 +16,19 @@
     <h1 class="h2">График</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
         <div class="btn-group mr-2">
-            <button class="btn btn-sm btn-outline-secondary" id="exportButton">Выгрузить данные</button>
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="exportDropdown"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Выгрузить данные
+                </button>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="exportDropdown">
+                    <a class="dropdown-item" href="{% url 'incomes:export_incomes_csv' %}"> Формат .csv(Доходы)</a>
+                    <a class="dropdown-item" href="{% url 'incomes:export_incomes_excel' %}">Формат .xlsx(Доходы)</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="{% url 'expenses:export_expenses_csv' %}"> Формат .csv(Расходы)</a>
+                    <a class="dropdown-item" href="{% url 'expenses:export_expenses_excel' %}">Формат .xlsx(Расходы)</a>
+                </div>
+            </div>
         </div>
         <div class="dropdown">
             <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
@@ -45,7 +56,6 @@
     </div>
 </div>
 
-
 <script src="{% static 'js/popper.min.js' %}"></script>
 <script src="{% static 'js/bootstrap.min.js' %}"></script>
 <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
@@ -55,12 +65,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.ru.min.js"
         charset="UTF-8"></script>
-
-<script>
-    document.getElementById('exportButton').addEventListener('click', function() {
-        alert('Данные будут выгружены! Когда нибудь =)'); // Логика для выгрузки данных
-    });
-</script>
 
 <script>
     $(document).ready(function(){

@@ -1,4 +1,8 @@
+import io
+import pandas as pd
+from django.http import HttpResponse
 from django.urls import reverse_lazy, reverse
+from openpyxl import Workbook
 from rest_framework import permissions
 from main.views import BaseDetailView, BaseCreateView, BaseUpdateView, BaseDeleteView, \
     BaseOperationViewSet, BaseOperationListView
@@ -74,3 +78,41 @@ class ExpenseDeleteView(BaseDeleteView):
         context = super().get_context_data(**kwargs)
         context['detail_url'] = reverse('expenses:expenses_detail', kwargs={'pk': self.object.pk})
         return context
+
+
+def export_expenses_csv(request):
+    expenses = Expense.objects.filter(user=request.user).values()
+    df = pd.DataFrame(expenses)
+    df.drop(columns=['id', 'user_id'], inplace=True)
+    df.rename(columns={
+        'amount': 'Сумма',
+        'date': 'Дата',
+        'source': 'Источник',
+        'category': 'Категория',
+        'context': 'Комментарий'
+    }, inplace=True)
+
+    # Используем StringIO для создания буфера
+    buffer = io.StringIO()
+    df.to_csv(buffer, index=False)
+
+    response = HttpResponse(buffer.getvalue(), content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="expenses.csv"'
+    return response
+
+def export_expenses_excel(request):
+    expenses = Expense.objects.filter(user=request.user).values()
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Expenses"
+
+    # Заголовки
+    ws.append(["Сумма", "Дата", "Источник", "Категория", "Комментарий"])
+
+    for expense in expenses:
+        ws.append([expense['amount'], expense['date'], expense['source'], expense['category'], expense['context']])
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="expenses.xlsx"'
+    wb.save(response)
+    return response

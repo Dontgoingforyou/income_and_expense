@@ -1,3 +1,5 @@
+import io
+from django.http import HttpResponse
 from django.urls import reverse_lazy, reverse
 from rest_framework import permissions
 from main.views import BaseDetailView, BaseCreateView, BaseUpdateView, BaseDeleteView, \
@@ -5,6 +7,8 @@ from main.views import BaseDetailView, BaseCreateView, BaseUpdateView, BaseDelet
 from .forms import IncomeForm
 from .models import Income
 from .serializers import IncomeSerializer
+import pandas as pd
+from openpyxl import Workbook
 
 
 class IncomeViewSet(BaseOperationViewSet):
@@ -65,6 +69,7 @@ class IncomeUpdateView(BaseUpdateView):
         context['operation_type'] = "Доход"
         return context
 
+
 class IncomeDeleteView(BaseDeleteView):
     model = Income
     template_name = 'main/operation_confirm_delete.html'
@@ -74,3 +79,41 @@ class IncomeDeleteView(BaseDeleteView):
         context = super().get_context_data(**kwargs)
         context['detail_url'] = reverse('incomes:incomes_detail', kwargs={'pk': self.object.pk})
         return context
+
+
+def export_incomes_csv(request):
+    # Получаю все доходы для текущего пользователя
+    incomes = Income.objects.filter(user=request.user).values()
+    df = pd.DataFrame(incomes)
+    df.drop(columns=['id', 'user_id'], inplace=True)
+    df.rename(columns={
+        'amount': 'Сумма',
+        'date': 'Дата',
+        'source': 'Источник',
+        'category': 'Категория',
+        'context': 'Комментарий'
+    }, inplace=True)
+
+    buffer = io.StringIO()
+    df.to_csv(buffer, index=False)
+
+    response = HttpResponse(buffer.getvalue(), content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="incomes.csv"'
+    return response
+
+def export_incomes_excel(request):
+    incomes = Income.objects.filter(user=request.user).values()
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Доходы"
+
+    # Заголовки
+    ws.append(["Сумма", "Дата", "Источник", "Категория", "Комментарий"])
+
+    for income in incomes:
+        ws.append([income['amount'], income['date'], income['source'], income['category'], income['context']])
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="incomes.xlsx"'
+    wb.save(response)
+    return response
