@@ -2,6 +2,7 @@ from django.urls import reverse_lazy, reverse
 from rest_framework import permissions
 from main.views import BaseDetailView, BaseCreateView, BaseUpdateView, BaseDeleteView, \
     BaseOperationViewSet, BaseOperationListView
+from .forms import IncomeForm
 from .models import Income
 from .serializers import IncomeSerializer
 
@@ -45,6 +46,7 @@ class IncomeCreateView(BaseCreateView):
     model = Income
     template_name = 'main/operation_form.html'
     success_url = reverse_lazy('incomes:incomes_list')
+    form_class = IncomeForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -56,6 +58,7 @@ class IncomeUpdateView(BaseUpdateView):
     model = Income
     template_name = 'main/operation_form.html'
     success_url = reverse_lazy('incomes:incomes_list')
+    form_class = IncomeForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

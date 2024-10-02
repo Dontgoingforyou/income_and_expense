@@ -9,7 +9,7 @@
         {% if object %}
         Изменение данных о доходе
         {% else %}
-        Добавление {{ operation_type }}a
+        Добавление {{ operation_type|lower }}a
         {% endif %}
     </h2>
     <form method="POST" enctype="multipart/form-data" class="needs-validation">

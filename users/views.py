@@ -1,6 +1,8 @@
+from multiprocessing.managers import Token
+
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, FormView
@@ -25,6 +27,9 @@ class RegisterView(CreateView):
         user = self.object
         login(self.request, user)
         send_registration_email(user)
+
+        Token.objects.get_or_create(user=user)
+
         return response
 
 

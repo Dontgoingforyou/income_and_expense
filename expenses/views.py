@@ -2,6 +2,7 @@ from django.urls import reverse_lazy, reverse
 from rest_framework import permissions
 from main.views import BaseDetailView, BaseCreateView, BaseUpdateView, BaseDeleteView, \
     BaseOperationViewSet, BaseOperationListView
+from .forms import ExpenseForm
 from .models import Expense
 from .serializers import ExpenseSerializer
 
@@ -45,6 +46,7 @@ class ExpenseCreateView(BaseCreateView):
     model = Expense
     template_name = 'main/operation_form.html'
     success_url = reverse_lazy('expenses:expenses_list')
+    form_class = ExpenseForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -56,6 +58,7 @@ class ExpenseUpdateView(BaseUpdateView):
     model = Expense
     template_name = 'main/operation_form.html'
     success_url = reverse_lazy('expenses:expenses_list')
+    form_class = ExpenseForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

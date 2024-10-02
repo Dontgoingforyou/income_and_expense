@@ -99,7 +99,6 @@ class BaseDetailView(LoginRequiredMixin, UserQuerySetMixin, DetailView):
 
 class BaseCreateView(LoginRequiredMixin, UserQuerySetMixin, CreateView):
     model = BaseOperation
-    fields = ("date", "amount", "source", "category", "context")
 
     def form_valid(self, form):
         form.instance.user = self.request.user
@@ -108,7 +107,6 @@ class BaseCreateView(LoginRequiredMixin, UserQuerySetMixin, CreateView):
 
 class BaseUpdateView(LoginRequiredMixin, UserQuerySetMixin, UpdateView):
     model = BaseOperation
-    fields = ("date", "amount", "source", "category", "context")
     success_url = reverse_lazy('incomes:incomes_list')
 
     def get_queryset(self):
@@ -136,6 +134,7 @@ class OperationChartDataView(APIView):
         else:
             start_date = today - timezone.timedelta(days=7)
 
+        # Фильтрация доходов и расходов по диапазону дат
         incomes = Income.objects.filter(user=request.user, date__gte=start_date, date__lte=today)
         expenses = Expense.objects.filter(user=request.user, date__gte=start_date, date__lte=today)
 
@@ -147,10 +146,11 @@ class OperationChartDataView(APIView):
         aggregated_expense_data = expenses.values('date').annotate(total=Sum('amount')).order_by('date')
         expense_data_dict = {item['date']: float(item['total']) for item in aggregated_expense_data}
 
-        # Формирование полного списка дат
+        # Создаем список дат, включая сегодняшнюю
         dates = [start_date + timezone.timedelta(days=i) for i in range(period)]
         labels = [date.strftime('%d.%m.%Y') for date in dates]
 
+        # Получение данных для графика, включая нулевые значения для отсутствующих дат
         income_data = [income_data_dict.get(date, 0) for date in dates]
         expense_data = [expense_data_dict.get(date, 0) for date in dates]
 
