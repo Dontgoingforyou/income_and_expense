@@ -7,40 +7,50 @@
     let combinedChartInstance = null;
 
     async function fetchCombinedChartData() {
-    const period = document.getElementById('periodSelect').value;
-    try {
-        const incomeResponse = await fetch(`/api/operations/chart/?type=income&period=${period}`);
-        const expenseResponse = await fetch(`/api/operations/chart/?type=expense&period=${period}`);
+        const period = document.getElementById('periodSelect').value;
+        console.log(`Fetching data for period: ${period} days`);
+        try {
+            const incomeResponse = await fetch(`/api/operations/chart/?type=income&period=${period}`);
+            const expenseResponse = await fetch(`/api/operations/chart/?type=expense&period=${period}`);
 
-        if (!incomeResponse.ok || !expenseResponse.ok) {
-            throw new Error('Ошибка сети');
+            console.log('Income Response Status:', incomeResponse.status);
+            console.log('Expense Response Status:', expenseResponse.status);
+
+            if (!incomeResponse.ok || !expenseResponse.ok) {
+                throw new Error(`Ошибка сети: ${incomeResponse.status} / ${expenseResponse.status}`);
+            }
+
+            const incomeData = await incomeResponse.json();
+            const expenseData = await expenseResponse.json();
+
+            console.log("Income Data:", incomeData);
+            console.log("Expense Data:", expenseData);
+
+            return {
+                labels: incomeData.labels,
+                incomeData: incomeData.incomeData,
+                expenseData: expenseData.expenseData
+            };
+        } catch (error) {
+            console.error('Ошибка при загрузке данных:', error);
+            return {
+                labels: [],
+                incomeData: [],
+                expenseData: []
+            };
         }
-
-        const incomeData = await incomeResponse.json();
-        const expenseData = await expenseResponse.json();
-
-        console.log("Income Data:", incomeData); // Лог для проверки данных доходов
-        console.log("Expense Data:", expenseData); // Лог для проверки данных расходов
-
-        return {
-            labels: incomeData.labels,
-            incomeData: incomeData.incomeData,
-            expenseData: expenseData.expenseData
-        };
-    } catch (error) {
-        console.error('Ошибка при загрузке данных:', error);
-        return {
-            labels: [],
-            incomeData: [],
-            expenseData: []
-        };
     }
-}
 
     async function initCombinedChart() {
     const chartData = await fetchCombinedChartData();
-    console.log("Chart Data:", chartData); // Лог для проверки данных для графика
-    const ctx = document.getElementById("combinedChart").getContext("2d");
+    console.log("Chart Data:", chartData);
+
+    // Проверка на существование canvas
+    const ctx = document.getElementById("combinedChart");
+    if (!ctx) {
+        console.error('Canvas element not found!');
+        return;
+    }
 
     if (!chartData.incomeData.length && !chartData.expenseData.length) {
         console.warn('Нет данных для отображения на графике.');
@@ -48,12 +58,14 @@
     }
 
     if (combinedChartInstance) {
+        // Обновление существующего графика
         combinedChartInstance.data.labels = chartData.labels;
         combinedChartInstance.data.datasets[0].data = chartData.incomeData;
         combinedChartInstance.data.datasets[1].data = chartData.expenseData;
         combinedChartInstance.update();
     } else {
-        combinedChartInstance = new Chart(ctx, {
+        // Создание нового графика
+        combinedChartInstance = new Chart(ctx.getContext("2d"), {
             type: 'line',
             data: {
                 labels: chartData.labels,

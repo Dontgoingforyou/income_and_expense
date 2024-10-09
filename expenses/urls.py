@@ -7,15 +7,14 @@ from .views import ExpenseViewSet, ExpenseListView, ExpenseCreateView, ExpenseDe
 app_name = ExpensesConfig.name
 
 router = DefaultRouter()
-router.register(r'api', ExpenseViewSet, basename='expense')
+router.register(r'api/expenses', ExpenseViewSet, basename='expense')
 
 urlpatterns = [
-    path('', include(router.urls)),
-    path('expenses/', ExpenseListView.as_view(), name='expenses_list'),
+    path('', ExpenseListView.as_view(), name='expenses_list'),
     path('expenses/<int:pk>/', ExpenseDetailView.as_view(), name='expenses_detail'),
     path('expenses/create/', ExpenseCreateView.as_view(), name='expenses_create'),
     path('expenses/<int:pk>/update/', ExpenseUpdateView.as_view(), name='expenses_update'),
     path('expenses/<int:pk>/delete/', ExpenseDeleteView.as_view(), name='expenses_delete'),
     path('export/', export_expenses_csv, name='export_expenses_csv'),
     path('export/excel/', export_expenses_excel, name='export_expenses_excel'),
-]
+] + router.urls

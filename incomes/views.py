@@ -12,6 +12,7 @@ from openpyxl import Workbook
 
 
 class IncomeViewSet(BaseOperationViewSet):
+    queryset = Income.objects.all()
     serializer_class = IncomeSerializer
     permission_classes = [permissions.IsAuthenticated]
 

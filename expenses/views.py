@@ -12,6 +12,7 @@ from .serializers import ExpenseSerializer
 
 
 class ExpenseViewSet(BaseOperationViewSet):
+    queryset = Expense.objects.all()
     serializer_class = ExpenseSerializer
     permission_classes = [permissions.IsAuthenticated]
 
