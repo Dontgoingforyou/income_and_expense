@@ -22,21 +22,32 @@ class HomeView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        # Последние операции
         latest_incomes = Income.objects.filter(user=self.request.user).order_by('-date')[:4]
         latest_expenses = Expense.objects.filter(user=self.request.user).order_by('-date')[:4]
 
-        latest_operations = []
-        for income in latest_incomes:
-            latest_operations.append({
-                'operation': income,
-                'type': 'Доход'
-            })
-        for expense in latest_expenses:
-            latest_operations.append({
-                'operation': expense,
-                'type': 'Расход'
-            })
-        latest_operations.sort(key=lambda x: x['operation'].date, reverse=True)
+        latest_operations = sorted(
+            [{'operation': income, 'type': 'Доход'} for income in latest_incomes] +
+            [{'operation': expense, 'type': 'Расход' } for expense in latest_expenses],
+            key=lambda x: x['operation'].date, reverse=True,
+        )
+
+        # Общие доходы и расходы
+        total_incomes = Income.objects.aggregate(Sum('amount'))['amount__sum'] or 0
+        total_expenses = Expense.objects.aggregate(Sum('amount'))['amount__sum'] or 0
+
+        # Аналитика
+        balance_change = total_incomes - total_expenses
+        saved_percentage = (balance_change / total_incomes * 100) if total_incomes > 0 else "Нет доходов"
+        income_expense_ratio = (total_incomes / total_expenses) if total_expenses > 0 else "Нет расходов"
+
+        context.update({
+            'total_incomes': total_incomes,
+            'total_expenses': total_expenses,
+            'balance_change': balance_change,
+            'saved_percentage': round(saved_percentage, 2),
+            'income_expense_ratio': round(income_expense_ratio, 1),
+        })
 
         context['latest_operations'] = latest_operations
         return context
@@ -158,3 +169,4 @@ class OperationChartDataView(APIView):
         expense_data = [expense_data_dict.get(date, 0) for date in dates]
 
         return Response({'labels': labels, 'incomeData': income_data, 'expenseData': expense_data})
+

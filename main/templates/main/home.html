@@ -8,6 +8,14 @@
 
 <h2 class="h2">График доходов и расходов</h2>
 
+<div class="analytics">
+    <p>Общий доход: {{ total_incomes }} руб.</p>
+    <p>Общий расход: {{ total_expenses }} руб.</p>
+    <p>Изменение баланса: {{ balance_change }} руб.</p>
+    <p>Процент отложенных средств: {{ saved_percentage }}%</p>
+    <p>Коэффициент соотношения доходов к расходам(во сколько раз доходы больше расходов): {{ income_expense_ratio }}</p>
+</div>
+
 {% include 'main/chart.html' %}
 
 <h4 class="mt-4">Последние операции</h4>

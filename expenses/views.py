@@ -3,6 +3,7 @@ import pandas as pd
 from django.http import HttpResponse
 from django.urls import reverse_lazy, reverse
 from openpyxl import Workbook
+from openpyxl.chart import PieChart, Reference
 from rest_framework import permissions
 from main.views import BaseDetailView, BaseCreateView, BaseUpdateView, BaseDeleteView, \
     BaseOperationViewSet, BaseOperationListView
@@ -93,6 +94,11 @@ def export_expenses_csv(request):
         'context': 'Комментарий'
     }, inplace=True)
 
+    # Подсчет общей суммы доходов
+    total_expense = df['Сумма'].sum()
+    total_row = pd.DataFrame({'Сумма': [total_expense]})
+    df = pd.concat([df, total_row], ignore_index=True)
+
     # Используем StringIO для создания буфера
     buffer = io.StringIO()
     df.to_csv(buffer, index=False)
@@ -104,14 +110,37 @@ def export_expenses_csv(request):
 def export_expenses_excel(request):
     expenses = Expense.objects.filter(user=request.user).values()
     wb = Workbook()
-    ws = wb.active
-    ws.title = "Expenses"
 
-    # Заголовки
-    ws.append(["Сумма", "Дата", "Источник", "Категория", "Комментарий"])
+    # Основной лист с данными
+    ws_data = wb.active
+    ws_data.title = "Расходы"
+    ws_data.append(["Сумма", "Дата", "Источник", "Категория", "Комментарий"])
 
     for expense in expenses:
-        ws.append([expense['amount'], expense['date'], expense['source'], expense['category'], expense['context']])
+        ws_data.append([expense['amount'], expense['date'], expense['source'], expense['category'], expense['context']])
+
+    # Лист с аналитикой
+    ws_summary = wb.create_sheet(title='Аналитика')
+    total_expense = sum([expense['amount'] for expense in expenses])
+    ws_summary.append(['Общая сумма доходов:', total_expense])
+
+    # Диаграмма по категориям
+    categories = {}
+    for expense in expenses:
+        categories[expense['category']] = categories.get(expense['category'], 0) + expense['amount']
+
+    ws_summary.append(['Категория', 'Сумма'])
+    for category, amount in categories.items():
+        ws_summary.append([category, amount])
+
+    pie = PieChart()
+    labels = Reference(ws_summary, min_col=1, min_row=2, max_row=1 + len(categories))
+    data = Reference(ws_summary, min_col=2, min_row=2, max_row=1 + len(categories))
+    pie.add_data(data, titles_from_data=True)
+    pie.set_categories(labels)
+    pie.title = 'Расходы по категориям'
+
+    ws_summary.add_chart(pie, 'D5')  # Позиция диаграммы
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename="expenses.xlsx"'
