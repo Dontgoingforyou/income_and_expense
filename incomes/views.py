@@ -18,6 +18,7 @@ class IncomeViewSet(BaseOperationViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
+# CRUD
 class IncomeListView(BaseOperationListView):
     model = Income
     template_name = 'main/operation_list.html'
@@ -83,6 +84,7 @@ class IncomeDeleteView(BaseDeleteView):
         return context
 
 
+# Экспорт отчетов
 def export_incomes_csv(request):
     # Получаю все доходы для текущего пользователя
     incomes = Income.objects.filter(user=request.user).values()
